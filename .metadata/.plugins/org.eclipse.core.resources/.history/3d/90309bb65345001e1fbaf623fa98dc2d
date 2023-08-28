@@ -1,0 +1,88 @@
+package com.prueba;
+
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
+
+import java.util.Arrays;
+
+import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import com.prueba.entity.Telefono;
+import com.prueba.entity.Usuario;
+import com.prueba.repository.UsuarioRepository;
+import com.prueba.response.ResponseUsuario;
+import com.prueba.service.UsuarioService;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+public class UsuarioServiceTest {
+
+	@Autowired
+	private UsuarioService usuarioService;
+
+	@MockBean
+	private UsuarioRepository usuarioRepository;
+	@Test
+    public void testRegistroExitoso() {
+        Usuario usuario = new Usuario();
+        usuario.setNombre("Johncito uwu");
+        usuario.setCorreo("johnpro38@gmail.com");
+        usuario.setContrasena("194726082aA");
+
+        Telefono telefono1 = new Telefono();
+        telefono1.setNumero("1234567");
+        telefono1.setCodigoCiudad("12");
+        telefono1.setCodigoPais("57");
+
+        Telefono telefono2 = new Telefono();
+        telefono2.setNumero("2222222");
+        telefono2.setCodigoCiudad("32");
+        telefono2.setCodigoPais("99");
+
+        usuario.setPhones(Arrays.asList(telefono1, telefono2));
+
+        when(usuarioRepository.findByCorreo(anyString())).thenReturn(null);
+        when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuario);
+
+        ResponseUsuario response = usuarioService.guardarUsuario(usuario);
+
+        assertNotNull(response.getData());
+        assertEquals("ok", response.getMessage());
+
+        Usuario usuarioGuardado = response.getData();
+        assertNotNull(usuarioGuardado.getPhones());
+        assertEquals(2, usuarioGuardado.getPhones().size());
+    }
+
+	@Test
+	public void testRegistroDuplicado() {
+		Usuario usuario = new Usuario();
+		usuario.setCorreo("nuevo@example.com");
+		usuario.setContrasena("Pass123");
+
+		when(usuarioRepository.findByCorreo("nuevo@example.com")).thenReturn(usuario);
+
+		ResponseUsuario response = usuarioService.guardarUsuario(usuario);
+
+		assertEquals("El correo ya registrado", response.getMessage());
+	}
+
+	@Test
+	public void testValidacionCorreoContrasena() {
+		Usuario usuario = new Usuario();
+		usuario.setCorreo("invalidemail");
+		usuario.setContrasena("weakpass");
+
+		ResponseUsuario response = usuarioService.guardarUsuario(usuario);
+
+		assertNull(response.getData());
+		assertEquals("Correo y/o contraseña inválidos", response.getMessage());
+	}
+}

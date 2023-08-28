@@ -1,0 +1,69 @@
+package com.prueba;
+
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
+
+import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import com.prueba.entity.Usuario;
+import com.prueba.repository.UsuarioRepository;
+import com.prueba.response.ResponseUsuario;
+import com.prueba.service.UsuarioService;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+public class UsuarioServiceTest {
+
+	@Autowired
+	private UsuarioService usuarioService;
+
+	@MockBean
+	private UsuarioRepository usuarioRepository;
+
+	@Test
+	public void testRegistroExitoso() {
+		Usuario usuario = new Usuario();
+		usuario.setCorreo("nuevo@example.com");
+		usuario.setContrasena("Pass123");
+
+		when(usuarioRepository.findByCorreo(anyString())).thenReturn(null);
+		when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuario);
+
+		ResponseUsuario response = usuarioService.guardarUsuario(usuario);
+
+		assertNotNull(response.getData());
+		assertEquals("ok", response.getMessage());
+	}
+
+	@Test
+	public void testRegistroDuplicado() {
+		Usuario usuario = new Usuario();
+		usuario.setCorreo("nuevo@example.com");
+		usuario.setContrasena("Pass123");
+
+		when(usuarioRepository.findByCorreo("nuevo@example.com")).thenReturn(null);
+
+		ResponseUsuario response = usuarioService.guardarUsuario(usuario);
+
+		assertEquals("El correo ya registrado", response.getMessage());
+	}
+
+	@Test
+	public void testValidacionCorreoContrasena() {
+		Usuario usuario = new Usuario();
+		usuario.setCorreo("invalidemail");
+		usuario.setContrasena("weakpass");
+
+		ResponseUsuario response = usuarioService.guardarUsuario(usuario);
+
+		assertNull(response.getData());
+		assertEquals("Correo y/o contraseña inválidos", response.getMessage());
+	}
+}

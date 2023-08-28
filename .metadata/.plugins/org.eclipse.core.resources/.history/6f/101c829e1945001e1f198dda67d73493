@@ -1,0 +1,21 @@
+package com.prueba.service;
+
+import java.util.List;
+
+import com.prueba.entity.Usuario;
+import com.prueba.response.ResponseToken;
+import com.prueba.response.ResponseUsuario;
+
+public interface UsuarioService {
+	
+	
+	Usuario findById(Long id);
+	Usuario save(Usuario request);
+	List<Usuario> findAll();
+	public void deleteById(Long id);
+	
+	ResponseUsuario guardarUsuario(Usuario request);
+	ResponseUsuario actualizarUsuario(Usuario usuario);
+	ResponseToken autenticarYObtenerToken(String correo, String contrasena);
+
+}

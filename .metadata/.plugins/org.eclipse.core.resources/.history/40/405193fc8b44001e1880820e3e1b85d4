@@ -1,0 +1,26 @@
+package com.prueba.response;
+
+import com.prueba.entity.Usuario;
+
+public class ResponseUsuario {
+
+	private String message;
+	private Usuario data;
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
+	public Usuario getData() {
+		return data;
+	}
+
+	public void setData(Usuario data) {
+		this.data = data;
+	}
+
+}

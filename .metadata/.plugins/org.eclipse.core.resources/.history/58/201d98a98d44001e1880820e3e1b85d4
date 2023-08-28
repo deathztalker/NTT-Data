@@ -1,0 +1,72 @@
+package com.prueba.impl;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.prueba.entity.Usuario;
+import com.prueba.repository.UsuarioRepository;
+import com.prueba.response.ResponseUsuario;
+import com.prueba.service.UsuarioService;
+
+
+@Service
+public class UsuarioServiceImpl implements UsuarioService {
+	
+	@Autowired
+	private UsuarioRepository repository;
+
+	@Override
+	public Usuario findById(Long id) {
+		return repository.findById(id).orElse(null);
+	}
+
+	@Override
+	public Usuario save(Usuario request) {
+		return repository.save(request);
+	}
+
+	@Override
+	public List<Usuario> findAll() {
+		return repository.findAll();
+	}
+
+	@Override
+	public void deleteById(Long id) {
+		repository.deleteById(id);
+		
+	}
+
+	@Override
+	public ResponseUsuario guardarUsuario(Usuario usuario) {
+		ResponseUsuario response = new ResponseUsuario();
+		Usuario buscar = repository.findByCorreo(usuario.getCorreo());
+		if (buscar != null) {
+			response.setMessage("El Correo Ya Esta Registrado");
+			return response;
+		}
+		if (!com.prueba.Util.Util.validarString(usuario.getContrasena())) {
+			response.setMessage("Contraseña No Cumple Con los Caracteres Requeridos");
+			response.setData(usuario);
+			response.setContrasena(usuario.getContrasena());
+			return response;
+		}
+		if (usuario.getToken() == null || usuario.getToken().isEmpty()) {
+			String token = com.prueba.Util.Util.generateOtp(usuario.getCorreo());
+			usuario.setToken(token);
+
+		}
+		try {
+			Usuario usersave = repository.save(usuario);
+			response.setMessage("ok");
+			response.setData(usersave);
+		} catch (Exception e) {
+			response.setMessage("Fallo El Servicio de Guardado" + e.getMessage().toString());
+			return response;
+		}
+
+		return response;
+	}
+
+}

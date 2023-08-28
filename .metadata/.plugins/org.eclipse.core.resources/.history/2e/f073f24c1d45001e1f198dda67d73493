@@ -1,0 +1,152 @@
+package com.prueba.impl;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.prueba.entity.Telefono;
+import com.prueba.entity.Usuario;
+import com.prueba.repository.TelefonoRepository;
+import com.prueba.repository.UsuarioRepository;
+import com.prueba.response.ResponseToken;
+import com.prueba.response.ResponseUsuario;
+import com.prueba.service.UsuarioService;
+
+@Service
+public class UsuarioServiceImpl implements UsuarioService {
+
+	@Autowired
+	private UsuarioRepository repository;
+
+	@Autowired
+	private TelefonoRepository telefonoRepository;
+
+	@Override
+	public Usuario findById(Long id) {
+		return repository.findById(id).orElse(null);
+	}
+
+	@Override
+	public Usuario save(Usuario request) {
+		return repository.save(request);
+	}
+
+	@Override
+	public List<Usuario> findAll() {
+		return repository.findAll();
+	}
+
+	@Override
+	public void deleteById(Long id) {
+		repository.deleteById(id);
+
+	}
+
+	@Override
+	public ResponseUsuario guardarUsuario(Usuario usuario) {
+		ResponseUsuario response = new ResponseUsuario();
+		Usuario buscar = repository.findByCorreo(usuario.getCorreo());
+
+		if (buscar != null) {
+			response.setMessage("El correo ya registrado");
+			return response;
+		}
+
+		if (!com.prueba.Util.Util.validarString(usuario.getContrasena())) {
+			response.setMessage("Contraseña No Cumple Con los Caracteres Requeridos");
+			response.setData(usuario);
+			response.setContrasena(usuario.getContrasena());
+			return response;
+		}
+
+		if (usuario.getToken() == null || usuario.getToken().isEmpty()) {
+			String token = com.prueba.Util.Util.generateOtp(usuario.getCorreo());
+			usuario.setToken(token);
+		}
+
+		try {
+		    Usuario usersave = repository.save(usuario);
+
+		    List<Telefono> telefonos = usuario.getPhones();
+		    if (telefonos != null && !telefonos.isEmpty()) {
+		        for (Telefono telefono : telefonos) {
+		            usersave.addTelefono(telefono);
+		        }
+		        repository.save(usersave); 
+		    }
+
+		    response.setMessage("ok");
+		    response.setData(usersave);
+		} catch (Exception e) {
+		    response.setMessage("Fallo El Servicio de Guardado" + e.getMessage().toString());
+		    return response;
+		}
+
+		return response;
+	}
+
+	@Override
+	public ResponseUsuario actualizarUsuario(Usuario usuario) {
+		ResponseUsuario response = new ResponseUsuario();
+		Usuario usuarioExistente = repository.findByCorreo(usuario.getCorreo());
+
+		if (usuarioExistente == null) {
+			response.setMessage("El Correo No Está Registrado");
+			return response;
+		}
+
+		if (!com.prueba.Util.Util.validarString(usuario.getContrasena())) {
+			response.setMessage("Contraseña No Cumple Con los Caracteres Requeridos");
+			response.setData(usuario);
+			response.setContrasena(usuario.getContrasena());
+			return response;
+		}
+
+		if (usuario.getToken() == null || usuario.getToken().isEmpty()) {
+			String token = com.prueba.Util.Util.generateOtp(usuario.getCorreo());
+			usuario.setToken(token);
+		}
+
+		try {
+			usuarioExistente.setNombre(usuario.getNombre());
+			usuarioExistente.setContrasena(usuario.getContrasena());
+			usuarioExistente.setToken(usuario.getToken());
+
+			Usuario usuarioModificado = repository.save(usuarioExistente);
+			response.setMessage("Usuario Modificado Exitosamente");
+			response.setData(usuarioModificado);
+		} catch (Exception e) {
+			response.setMessage("Fallo El Servicio de Modificación: " + e.getMessage());
+			return response;
+		}
+
+		return response;
+	}
+
+	@Override
+	public ResponseToken autenticarYObtenerToken(String correo, String contrasena) {
+		ResponseToken responseToken = new ResponseToken();
+
+		Usuario usuario = repository.findByCorreoAndContrasena(correo, contrasena);
+
+		if (usuario == null) {
+			responseToken.setToken("Invalido");
+			responseToken.setMessage("Credenciales inválidas u Usuario no Existe");
+			return responseToken;
+		}
+
+		String token = usuario.getToken();
+
+		if (token == null || token.isEmpty()) {
+			token = com.prueba.Util.Util.generateOtp(usuario.getCorreo());
+			usuario.setToken(token);
+			repository.save(usuario);
+		}
+
+		responseToken.setToken(token);
+		responseToken.setMessage("Logeando...");
+		return responseToken;
+	}
+
+}

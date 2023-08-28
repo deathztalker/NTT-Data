@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<qualifiedTypeNameHistroy>
+    <fullyQualifiedTypeName name="org.springframework.web.bind.annotation.PutMapping"/>
+    <fullyQualifiedTypeName name="com.prueba.entity.Usuario"/>
+    <fullyQualifiedTypeName name="org.springframework.http.ResponseEntity"/>
+    <fullyQualifiedTypeName name="com.prueba.response.ResponseToken"/>
+    <fullyQualifiedTypeName name="com.prueba.response.ResponseCredenciales"/>
+    <fullyQualifiedTypeName name="com.prueba.entity.Telefono"/>
+    <fullyQualifiedTypeName name="com.prueba.repository.TelefonoRepository"/>
+    <fullyQualifiedTypeName name="com.fasterxml.jackson.annotation.JsonIgnore"/>
+    <fullyQualifiedTypeName name="java.util.ArrayList"/>
+    <fullyQualifiedTypeName name="java.lang.System"/>
+</qualifiedTypeNameHistroy>

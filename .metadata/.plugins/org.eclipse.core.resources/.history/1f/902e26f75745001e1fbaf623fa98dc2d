@@ -1,0 +1,160 @@
+package com.prueba;
+
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import com.prueba.entity.Telefono;
+import com.prueba.entity.Usuario;
+import com.prueba.repository.UsuarioRepository;
+import com.prueba.response.ResponseCredenciales;
+import com.prueba.response.ResponseToken;
+import com.prueba.response.ResponseUsuario;
+import com.prueba.service.UsuarioService;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+public class UsuarioServiceTest {
+
+	@Autowired
+	private UsuarioService usuarioService;
+
+	@MockBean
+	private UsuarioRepository usuarioRepository;
+
+	@Test
+	public void testRegistroExitoso() {
+		Usuario usuario = new Usuario();
+		usuario.setNombre("John");
+		usuario.setCorreo("johnpro38@gmail.com");
+		usuario.setContrasena("194726082aA");
+
+		Telefono telefono1 = new Telefono();
+		telefono1.setNumero("1234567");
+		telefono1.setCodigoCiudad("12");
+		telefono1.setCodigoPais("57");
+
+		Telefono telefono2 = new Telefono();
+		telefono2.setNumero("2222222");
+		telefono2.setCodigoCiudad("32");
+		telefono2.setCodigoPais("99");
+
+		usuario.setPhones(Arrays.asList(telefono1, telefono2));
+
+		when(usuarioRepository.findByCorreo(anyString())).thenReturn(null);
+		when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuario);
+
+		ResponseUsuario response = usuarioService.guardarUsuario(usuario);
+
+		assertNotNull(response.getData());
+		assertEquals("ok", response.getMessage());
+
+		Usuario usuarioGuardado = response.getData();
+		assertNotNull(usuarioGuardado.getPhones());
+		assertEquals(2, usuarioGuardado.getPhones().size());
+	}
+
+	@Test
+	public void testRegistroDuplicado() {
+		Usuario usuario = new Usuario();
+		usuario.setCorreo("johnpro38@gmail.com");
+		usuario.setContrasena("Pass123");
+
+		when(usuarioRepository.findByCorreo("johnpro38@gmail.com")).thenReturn(usuario);
+
+		ResponseUsuario response = usuarioService.guardarUsuario(usuario);
+
+		assertEquals("El correo ya registrado", response.getMessage());
+	}
+
+	@Test
+	public void testLoginExitoso() {
+		String correo = "johnpro38@gmail.com";
+		String contrasena = "194726082aA";
+		Usuario usuarioMock = new Usuario();
+		usuarioMock.setCorreo(correo);
+		usuarioMock.setContrasena(contrasena);
+		usuarioMock.setToken("mockedToken");
+
+		when(usuarioRepository.findByCorreoAndContrasena(correo, contrasena)).thenReturn(usuarioMock);
+
+		ResponseToken response = usuarioService.autenticarYObtenerToken(correo, contrasena);
+
+		assertNotNull(response.getToken());
+		assertEquals("Autenticación exitosa", response.getMessage());
+		verify(usuarioRepository, times(1)).findByCorreoAndContrasena(correo, contrasena);
+	}
+
+	@Test
+	public void testLoginFallido() {
+		String correo = "johnpro38@gmail.com";
+		String contrasena = "invalidpass";
+
+		when(usuarioRepository.findByCorreoAndContrasena(correo, contrasena)).thenReturn(null);
+
+		ResponseToken response = usuarioService.autenticarYObtenerToken(correo, contrasena);
+
+		assertEquals("Credenciales inválidas o Usuario no Existe", response.getMessage());
+		assertEquals("Invalido", response.getToken());
+		verify(usuarioRepository, times(1)).findByCorreoAndContrasena(correo, contrasena);
+	}
+
+	@Test
+	public void testActualizacionExitosa() {
+		String correo = "johnpro38@gmail.com";
+		String contrasena = "194726082aA";
+
+		Usuario usuarioExistenteMock = new Usuario();
+		usuarioExistenteMock.setCorreo(correo);
+		usuarioExistenteMock.setContrasena(contrasena);
+		usuarioExistenteMock.setToken("mockedToken"); // Simulamos un token ya generado
+
+		when(usuarioRepository.findByCorreo(correo)).thenReturn(usuarioExistenteMock);
+
+		Usuario usuarioActualizado = new Usuario();
+		usuarioActualizado.setCorreo(correo);
+		usuarioActualizado.setNombre("John (actualizado)");
+		usuarioActualizado.setContrasena("194726082aA");
+
+		List<Telefono> telefonosActualizados = new ArrayList<>();
+		telefonosActualizados.add(new Telefono());
+		telefonosActualizados.get(0).setNumero("1234567");
+		telefonosActualizados.get(0).setCodigoCiudad("12");
+		telefonosActualizados.get(0).setCodigoPais("57");
+
+		telefonosActualizados.add(new Telefono());
+		telefonosActualizados.get(1).setNumero("2222222");
+		telefonosActualizados.get(1).setCodigoCiudad("32");
+		telefonosActualizados.get(1).setCodigoPais("99");
+
+		usuarioActualizado.setPhones(telefonosActualizados);
+
+		Usuario usuarioModificadoMock = new Usuario();
+		usuarioModificadoMock.setCorreo(correo);
+		usuarioModificadoMock.setNombre("Johncito (actualizado)");
+		usuarioModificadoMock.setContrasena("194726082aA");
+		usuarioModificadoMock.setPhones(telefonosActualizados);
+		when(usuarioRepository.save(usuarioExistenteMock)).thenReturn(usuarioModificadoMock);
+
+		ResponseUsuario response = usuarioService.actualizarUsuario(usuarioActualizado);
+
+		assertNotNull(response.getData());
+		assertEquals("Usuario Modificado Exitosamente", response.getMessage());
+
+		verify(usuarioRepository, times(1)).findByCorreo(correo);
+		verify(usuarioRepository, times(1)).save(usuarioExistenteMock);
+	}
+
+}

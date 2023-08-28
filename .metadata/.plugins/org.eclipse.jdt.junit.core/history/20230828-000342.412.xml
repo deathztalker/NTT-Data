@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?><testrun name="Rerun UsuarioServiceTest" project="prueba-ntt" tests="5" started="5" failures="0" errors="0" ignored="0">
+  <testsuite name="com.prueba.UsuarioServiceTest" time="1.226" displayname="UsuarioServiceTest" uniqueid="[engine:junit-jupiter]/[class:com.prueba.UsuarioServiceTest]">
+    <testcase name="testRegistroDuplicado" classname="com.prueba.UsuarioServiceTest" time="0.288" displayname="testRegistroDuplicado()" uniqueid="[engine:junit-jupiter]/[class:com.prueba.UsuarioServiceTest]/[method:testRegistroDuplicado()]"/>
+    <testcase name="testLoginExitoso" classname="com.prueba.UsuarioServiceTest" time="0.073" displayname="testLoginExitoso()" uniqueid="[engine:junit-jupiter]/[class:com.prueba.UsuarioServiceTest]/[method:testLoginExitoso()]"/>
+    <testcase name="testLoginFallido" classname="com.prueba.UsuarioServiceTest" time="0.015" displayname="testLoginFallido()" uniqueid="[engine:junit-jupiter]/[class:com.prueba.UsuarioServiceTest]/[method:testLoginFallido()]"/>
+    <testcase name="testRegistroExitoso" classname="com.prueba.UsuarioServiceTest" time="0.31" displayname="testRegistroExitoso()" uniqueid="[engine:junit-jupiter]/[class:com.prueba.UsuarioServiceTest]/[method:testRegistroExitoso()]"/>
+    <testcase name="testActualizacionExitosa" classname="com.prueba.UsuarioServiceTest" time="0.517" displayname="testActualizacionExitosa()" uniqueid="[engine:junit-jupiter]/[class:com.prueba.UsuarioServiceTest]/[method:testActualizacionExitosa()]"/>
+  </testsuite>
+</testrun>
