@@ -41,6 +41,3 @@ El proyecto incluye pruebas unitarias para validar la funcionalidad de registro,
 
 Si encuentras algún problema o tienes sugerencias de mejora, siéntete libre de abrir un issue en este repositorio. También son bienvenidas las pull requests para contribuir al desarrollo de la aplicación.
 
-## Licencia
-
-Este proyecto se distribuye bajo la licencia MIT. Consulta el archivo `LICENSE` para más detalles.
